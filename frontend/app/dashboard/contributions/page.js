@@ -564,95 +564,93 @@ export default function ContributionsPage() {
           </div>
         </section>
 
-        
-<section className="dashboard-card p-5 sm:p-6">
-  <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h2 className="text-base font-semibold text-white">
-        Repository Activity
-      </h2>
-      <p className="mt-1 text-sm text-zinc-500">
-        Your contributions grouped by GitHub repository
-      </p>
-    </div>
-
-    <span className="text-sm text-emerald-400">
-      {loading
-        ? "Loading..."
-        : `${repositoryActivity.length} repositories`}
-    </span>
-  </div>
-
-  {loading ? (
-    <p className="py-8 text-center text-sm text-zinc-400">
-      Loading repository activity...
-    </p>
-  ) : error ? (
-    <p className="py-8 text-center text-sm text-zinc-400">
-      Unable to load repository activity.
-    </p>
-  ) : repositoryActivity.length === 0 ? (
-    <p className="py-8 text-center text-sm text-zinc-400">
-      No repository activity found for this period.
-    </p>
-  ) : (
-    <div className="space-y-4">
-      {repositoryActivity.map((repo) => (
-        <div
-          key={repo.nameWithOwner}
-          className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4"
-        >
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
-              <a
-                href={repo.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="break-all text-sm font-semibold text-blue-400 hover:text-blue-300"
-              >
-                {repo.nameWithOwner}
-              </a>
-
-              <p className="mt-1 text-xs text-zinc-500">
-                {repo.isPrivate ? "Private repository" : "Public repository"}
+        <section className="dashboard-card p-5 sm:p-6">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-base font-semibold text-white">
+                Repository Activity
+              </h2>
+              <p className="mt-1 text-sm text-zinc-500">
+                Your contributions grouped by GitHub repository
               </p>
             </div>
 
-            <div className="text-right">
-              <p className="text-lg font-bold text-white">
-                {repo.totalContributions.toLocaleString()}
-              </p>
-              <p className="text-xs text-zinc-500">
-                Contributions
-              </p>
-            </div>
+            <span className="text-sm text-emerald-400">
+              {loading
+                ? "Loading..."
+                : `${repositoryActivity.length} repositories`}
+            </span>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {[
-              { label: "Commits", value: repo.commits },
-              { label: "Pull Requests", value: repo.pullRequests },
-              { label: "Issues", value: repo.issues },
-              { label: "Reviews", value: repo.reviews },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="rounded-lg bg-zinc-800/70 p-3"
-              >
-                <p className="text-lg font-semibold text-white">
-                  {item.value.toLocaleString()}
-                </p>
-                <p className="mt-1 text-xs text-zinc-500">
-                  {item.label}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  )}
-</section>
+          {loading ? (
+            <p className="py-8 text-center text-sm text-zinc-400">
+              Loading repository activity...
+            </p>
+          ) : error ? (
+            <p className="py-8 text-center text-sm text-zinc-400">
+              Unable to load repository activity.
+            </p>
+          ) : repositoryActivity.length === 0 ? (
+            <p className="py-8 text-center text-sm text-zinc-400">
+              No repository activity found for this period.
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {repositoryActivity.map((repo) => (
+                <div
+                  key={repo.nameWithOwner}
+                  className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <a
+                        href={repo.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="break-all text-sm font-semibold text-blue-400 hover:text-blue-300"
+                      >
+                        {repo.nameWithOwner}
+                      </a>
+
+                      <p className="mt-1 text-xs text-zinc-500">
+                        {repo.isPrivate ? "Private repository" : "Public repository"}
+                      </p>
+                    </div>
+
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-white">
+                        {repo.totalContributions.toLocaleString()}
+                      </p>
+                      <p className="text-xs text-zinc-500">
+                        Contributions
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {[
+                      { label: "Commits", value: repo.commits },
+                      { label: "Pull Requests", value: repo.pullRequests },
+                      { label: "Issues", value: repo.issues },
+                      { label: "Reviews", value: repo.reviews },
+                    ].map((item) => (
+                      <div
+                        key={item.label}
+                        className="rounded-lg bg-zinc-800/70 p-3"
+                      >
+                        <p className="text-lg font-semibold text-white">
+                          {item.value.toLocaleString()}
+                        </p>
+                        <p className="mt-1 text-xs text-zinc-500">
+                          {item.label}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
       </div>
     </AppShell>
