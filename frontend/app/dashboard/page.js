@@ -1,7 +1,9 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
 import AppShell from "../components/AppShell";
+import { GitPullRequest } from "lucide-react";
 
 
 const contributionLevels = [
@@ -11,6 +13,123 @@ const contributionLevels = [
   "bg-emerald-600",
   "bg-emerald-400",
 ];
+
+// --------------------------------------------------
+// Skeleton Components
+// --------------------------------------------------
+
+function Skeleton({ className = "" }) {
+  return (
+    <div
+      className={`animate-pulse rounded-md bg-zinc-800 ${className}`}
+    />
+  );
+}
+
+function StatSkeleton() {
+  return (
+    <div className="dashboard-card p-5">
+      <div className="mb-5 flex items-center justify-between">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-9 w-9 rounded-lg" />
+      </div>
+
+      <Skeleton className="h-9 w-24" />
+      <Skeleton className="mt-3 h-3 w-28" />
+    </div>
+  );
+}
+
+function ContributionCalendarSkeleton() {
+  return (
+    <div className="custom-scrollbar overflow-x-auto pb-2">
+      <div className="flex min-w-max gap-1">
+        {Array.from({ length: 53 }).map((_, weekIndex) => (
+          <div
+            key={weekIndex}
+            className="flex w-3 flex-col gap-1"
+          >
+            <Skeleton className="mb-1 h-4 w-3" />
+
+            {Array.from({ length: 7 }).map((_, dayIndex) => (
+              <Skeleton
+                key={dayIndex}
+                className="h-3 w-3 rounded-[3px]"
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RepositoryCardSkeleton() {
+  return (
+    <div className="dashboard-card p-5">
+      <div className="mb-4 flex items-center gap-2">
+        <Skeleton className="h-5 w-5 rounded" />
+        <Skeleton className="h-4 w-36" />
+        <Skeleton className="ml-auto h-5 w-14 rounded-full" />
+      </div>
+
+      <div className="mb-5 space-y-2">
+        <Skeleton className="h-3 w-full" />
+        <Skeleton className="h-3 w-3/4" />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-5">
+        <Skeleton className="h-3 w-20" />
+        <Skeleton className="h-3 w-12" />
+        <Skeleton className="h-3 w-12" />
+        <Skeleton className="ml-auto h-3 w-16" />
+      </div>
+    </div>
+  );
+}
+
+function LanguageSkeleton() {
+  return (
+    <div className="space-y-6">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <div key={index}>
+          <div className="mb-3 flex items-center justify-between">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+
+          <Skeleton className="h-2 w-full rounded-full" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ActivitySkeleton() {
+  return (
+    <div className="divide-y divide-zinc-800">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <div
+          key={index}
+          className="flex items-start gap-4 p-5"
+        >
+          <Skeleton className="h-10 w-10 shrink-0 rounded-lg" />
+
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-4 w-48 max-w-full" />
+            <Skeleton className="h-3 w-64 max-w-full" />
+          </div>
+
+          <Skeleton className="h-3 w-12 shrink-0" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// --------------------------------------------------
+// Helper Functions
+// --------------------------------------------------
 
 function getContributionLevel(count, maxCount) {
   if (count === 0) return 0;
@@ -24,16 +143,21 @@ function getContributionLevel(count, maxCount) {
   return 4;
 }
 
-
 function SectionHeading({ title, subtitle, action }) {
   return (
     <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h3 className="text-base font-semibold text-white">{title}</h3>
+        <h3 className="text-base font-semibold text-white">
+          {title}
+        </h3>
+
         {subtitle && (
-          <p className="mt-1 text-sm text-zinc-500">{subtitle}</p>
+          <p className="mt-1 text-sm text-zinc-500">
+            {subtitle}
+          </p>
         )}
       </div>
+
       {action}
     </div>
   );
@@ -46,7 +170,8 @@ function getActivityDetails(event) {
   switch (event.type) {
     case "PushEvent": {
       const count = payload.size ?? payload.commits?.length ?? 0;
-      const branch = payload.ref?.replace("refs/heads/", "") || "unknown";
+      const branch =
+        payload.ref?.replace("refs/heads/", "") || "unknown";
 
       return {
         title: `Pushed ${count} ${count === 1 ? "commit" : "commits"}`,
@@ -59,7 +184,7 @@ function getActivityDetails(event) {
       return {
         title: `${capitalize(payload.action || "updated")} a pull request`,
         detail: `${repoName} · ${payload.pull_request?.title || "Pull request"}`,
-        icon: "⑂",
+        icon: <GitPullRequest size={18} />,
       };
 
     case "IssuesEvent":
@@ -80,7 +205,7 @@ function getActivityDetails(event) {
       return {
         title: "Forked a repository",
         detail: repoName,
-        icon: "⑂",
+        icon: <GitPullRequest size={18} />,
       };
 
     case "CreateEvent":
@@ -106,7 +231,10 @@ function getActivityDetails(event) {
 
     default:
       return {
-        title: event.type?.replace(/Event$/, "").replace(/([a-z])([A-Z])/g, "$1 $2") || "Activity",
+        title:
+          event.type
+            ?.replace(/Event$/, "")
+            .replace(/([a-z])([A-Z])/g, "$1 $2") || "Activity",
         detail: repoName,
         icon: "•",
       };
@@ -122,7 +250,10 @@ function getRelativeTime(dateString) {
 
   if (!Number.isFinite(timestamp)) return "Recently";
 
-  const seconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
+  const seconds = Math.max(
+    0,
+    Math.floor((Date.now() - timestamp) / 1000)
+  );
 
   if (seconds < 60) return "Just now";
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
@@ -132,18 +263,25 @@ function getRelativeTime(dateString) {
   return new Date(dateString).toLocaleDateString();
 }
 
+// --------------------------------------------------
+// Dashboard Page
+// --------------------------------------------------
+
 export default function DashboardPage() {
-  
   const [profile, setProfile] = useState(null);
   const [repositories, setRepositories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
   const [activities, setActivities] = useState([]);
   const [activityLoading, setActivityLoading] = useState(true);
   const [activityError, setActivityError] = useState("");
+
   const [contributionData, setContributionData] = useState(null);
   const [contributionLoading, setContributionLoading] = useState(true);
   const [contributionError, setContributionError] = useState("");
+
+  // Load profile and repositories
 
   useEffect(() => {
     async function loadDashboard() {
@@ -178,6 +316,8 @@ export default function DashboardPage() {
 
     loadDashboard();
   }, []);
+
+  // Load recent GitHub activities
 
   useEffect(() => {
     if (!profile?.username) return;
@@ -220,7 +360,7 @@ export default function DashboardPage() {
                 id: event.id,
                 ...getActivityDetails(event),
                 time: getRelativeTime(event.created_at),
-                url: `https://github.com/${event.repo.name}`,
+                url: `https://github.com/${event.repo?.name || ""}`,
               },
             ])
           ).values()
@@ -229,7 +369,9 @@ export default function DashboardPage() {
         setActivities(uniqueEvents.slice(0, 5));
       } catch (err) {
         if (err.name !== "AbortError") {
-          setActivityError(err.message || "Something went wrong.");
+          setActivityError(
+            err.message || "Something went wrong."
+          );
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -243,7 +385,8 @@ export default function DashboardPage() {
     return () => controller.abort();
   }, [profile?.username]);
 
-  
+  // Load contribution calendar
+
   useEffect(() => {
     const controller = new AbortController();
 
@@ -284,6 +427,7 @@ export default function DashboardPage() {
     return () => controller.abort();
   }, []);
 
+  // Dashboard Calculations
 
   const totalStars = repositories.reduce(
     (total, repo) => total + repo.stargazers_count,
@@ -312,7 +456,8 @@ export default function DashboardPage() {
       label: "Total Forks",
       value: totalForks.toLocaleString(),
       change: "Across loaded repositories",
-      icon: "⑂",
+      icon: <GitPullRequest size={18} />,
+
     },
     {
       label: "Followers",
@@ -326,7 +471,6 @@ export default function DashboardPage() {
     .sort((a, b) => b.stargazers_count - a.stargazers_count)
     .slice(0, 4);
 
-
   const contributionWeeks = contributionData?.weeks ?? [];
 
   const maxContributionCount = Math.max(
@@ -336,61 +480,73 @@ export default function DashboardPage() {
     )
   );
 
+  // Language Analytics
 
-  
-  const languageStats = Object.entries(
-    repositories.reduce((counts, repo) => {
-      const language = repo.language;
+  const languageCounts = repositories.reduce((counts, repo) => {
+    const language = repo.language;
 
-      if (language) {
-        counts[language] = (counts[language] || 0) + 1;
-      }
+    if (language) {
+      counts[language] = (counts[language] || 0) + 1;
+    }
 
-      return counts;
-    }, {})
-  )
-  .map(([name, count]) => ({
-    name,
-    count,
-    percentage:
-      (count /
-        Object.values(
-          repositories.reduce((counts, repo) => {
-            if (repo.language) {
-              counts[repo.language] =
-                (counts[repo.language] || 0) + 1;
-            }
-            return counts;
-          }, {})
-        ).reduce((total, value) => total + value, 0)) *
-      100,
-  }))
-  .sort((a, b) => b.count - a.count)
-  .slice(0, 6);
+    return counts;
+  }, {});
 
+  const totalLanguageRepos = Object.values(languageCounts).reduce(
+    (total, count) => total + count,
+    0
+  );
+
+  const languageStats = Object.entries(languageCounts)
+    .map(([name, count]) => ({
+      name,
+      count,
+      percentage: totalLanguageRepos
+        ? (count / totalLanguageRepos) * 100
+        : 0,
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6);
 
   return (
     <AppShell>
       <div className="mx-auto max-w-7xl space-y-8">
-        {/* Welcome section */}
+
+        {/* Welcome Section */}
+
         <section className="flex flex-wrap items-center justify-between gap-5">
-          <p className="mb-2 text-sm text-blue-400">
-            Your GitHub overview
-          </p>
+          <div>
+            <p className="mb-2 text-sm text-blue-400">
+              Your GitHub overview
+            </p>
 
-          <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-            Welcome back, {profile?.name || profile?.username || "Developer"} 👋
-          </h1>
+            {loading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-9 w-72 max-w-full" />
+                <Skeleton className="h-4 w-80 max-w-full" />
+              </div>
+            ) : (
+              <>
+                <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                  Welcome back, {profile?.name || profile?.username || "Developer"} 👋
+                </h1>
 
-          <p className="mt-2 text-sm text-zinc-400">
-            Here's what's happening with your GitHub activity.
-          </p>
+                <p className="mt-2 text-sm text-zinc-400">
+                  Here's what's happening with your GitHub activity.
+                </p>
+              </>
+            )}
 
-          {error && (
-            <p className="mt-3 text-sm text-red-400">{error}</p>
-          )}
+            {error && (
+              <p className="mt-3 text-sm text-red-400">
+                {error}
+              </p>
+            )}
+          </div>
 
-          {profile?.profileUrl && (
+          {loading ? (
+            <Skeleton className="h-10 w-40 rounded-lg" />
+          ) : profile?.profileUrl ? (
             <a
               href={profile.profileUrl}
               target="_blank"
@@ -399,35 +555,46 @@ export default function DashboardPage() {
             >
               View GitHub Profile ↗
             </a>
-          )}
+          ) : null}
         </section>
 
         {/* Statistics */}
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {stats.map((stat) => (
-            <div
-              key={stat.label}
-              className="dashboard-card p-5 transition hover:border-zinc-700"
-            >
-              <div className="mb-5 flex items-center justify-between">
-                <p className="text-sm text-zinc-400">{stat.label}</p>
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 text-xl text-blue-400">
-                  {stat.icon}
-                </span>
-              </div>
 
-              <p className="text-3xl font-bold tracking-tight text-white">
-                {stat.value}
-              </p>
-              <p className="mt-2 text-xs text-emerald-400">
-                {stat.change}
-              </p>
-            </div>
-          ))}
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {loading ? (
+            Array.from({ length: 4 }).map((_, index) => (
+              <StatSkeleton key={index} />
+            ))
+          ) : (
+            stats.map((stat) => (
+              <div
+                key={stat.label}
+                className="dashboard-card p-5 transition hover:border-zinc-700"
+              >
+                <div className="mb-5 flex items-center justify-between">
+                  <p className="text-sm text-zinc-400">
+                    {stat.label}
+                  </p>
+
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 text-xl text-blue-400">
+                    {stat.icon}
+                  </span>
+                </div>
+
+                <p className="text-3xl font-bold tracking-tight text-white">
+                  {stat.value}
+                </p>
+
+                <p className="mt-2 text-xs text-emerald-400">
+                  {stat.change}
+                </p>
+              </div>
+            ))
+          )}
         </section>
 
-        
-        {/* Contributions */}
+        {/* Contribution Activity */}
+
         <section className="dashboard-card p-5 sm:p-6">
           <SectionHeading
             title="Contribution Activity"
@@ -437,23 +604,20 @@ export default function DashboardPage() {
                 {contributionLoading
                   ? "Loading..."
                   : contributionData
-                    ? `${contributionData.totalContributions.toLocaleString()} contributions`
+                    ? `${(contributionData.totalContributions ?? 0).toLocaleString()} contributions`
                     : "Contributions unavailable"}
               </span>
             }
           />
 
           {contributionLoading ? (
-            <div className="flex h-28 items-center justify-center">
-              <p className="text-sm text-zinc-400">
-                Loading your contribution calendar...
-              </p>
-            </div>
+            <ContributionCalendarSkeleton />
           ) : contributionError ? (
             <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4">
               <p className="text-sm text-red-400">
                 {contributionError}
               </p>
+
               <button
                 type="button"
                 onClick={() => window.location.reload()}
@@ -472,6 +636,7 @@ export default function DashboardPage() {
                 <div className="flex min-w-max gap-1">
                   {contributionWeeks.map((week, weekIndex) => {
                     const firstDay = week.contributionDays[0]?.date;
+
                     const monthStart = week.contributionDays.find(
                       (day) => day.date.endsWith("-01")
                     );
@@ -538,12 +703,14 @@ export default function DashboardPage() {
 
                 <div className="flex items-center gap-2 text-xs text-zinc-500">
                   <span>Less</span>
+
                   {contributionLevels.map((level) => (
                     <span
                       key={level}
                       className={`h-3 w-3 rounded-[3px] ${level}`}
                     />
                   ))}
+
                   <span>More</span>
                 </div>
               </div>
@@ -551,7 +718,8 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* Repositories */}
+        {/* Popular Repositories */}
+
         <section>
           <SectionHeading
             title="Popular Repositories"
@@ -568,95 +736,103 @@ export default function DashboardPage() {
 
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
             {loading ? (
-  <p className="text-sm text-zinc-400">Loading repositories...</p>
-) : popularRepositories.length === 0 ? (
-  <p className="text-sm text-zinc-400">
-    {error || "No repositories found."}
-  </p>
-) : (
-  popularRepositories.map((repo) => (
-              <article
-                key={repo.name}
-                className="dashboard-card p-5 transition hover:border-zinc-700"
-              >
-                <div className="mb-3 flex items-center gap-2">
-                  <span className="text-lg text-zinc-400">▤</span>
-                  <h4 className="font-semibold text-blue-400">
-                    {repo.name}
-                  </h4>
-                  <span className="ml-auto rounded-full border border-zinc-700 px-2 py-0.5 text-[10px] text-zinc-400">
-                    Public
-                  </span>
-                </div>
+              Array.from({ length: 4 }).map((_, index) => (
+                <RepositoryCardSkeleton key={index} />
+              ))
+            ) : popularRepositories.length === 0 ? (
+              <p className="text-sm text-zinc-400">
+                {error || "No repositories found."}
+              </p>
+            ) : (
+              popularRepositories.map((repo) => (
+                <article
+                  key={repo.name}
+                  className="dashboard-card p-5 transition hover:border-zinc-700"
+                >
+                  <div className="mb-3 flex items-center gap-2">
+                    <span className="text-lg text-zinc-400">▤</span>
 
-                <p className="mb-5 min-h-10 text-sm leading-5 text-zinc-400">
-                  {repo.description}
-                </p>
+                    <h4 className="font-semibold text-blue-400">
+                      {repo.name}
+                    </h4>
 
-                <div className="flex flex-wrap items-center gap-x-5 gap-y-3 text-xs text-zinc-500">
-                  <span className="flex items-center gap-2">
-                    <span className={`h-2.5 w-2.5 rounded-full ${repo.color}`} />
-                    {repo.language}
-                  </span>
-                  <span>☆ {repo.stars}</span>
-                  <span>⑂ {repo.forks}</span>
-                  <span className="ml-auto">{repo.updated}</span>
-                </div>
-              </article>
-            ))
-          )}
+                    <span className="ml-auto rounded-full border border-zinc-700 px-2 py-0.5 text-[10px] text-zinc-400">
+                      Public
+                    </span>
+                  </div>
+
+                  <p className="mb-5 min-h-10 text-sm leading-5 text-zinc-400">
+                    {repo.description}
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-x-5 gap-y-3 text-xs text-zinc-500">
+                    <span className="flex items-center gap-2">
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full ${repo.color}`}
+                      />
+                      {repo.language}
+                    </span>
+
+                    <span>☆ {repo.stars || 0}</span>
+                    <span className="flex gap-1"><GitPullRequest size={14} /> {repo.forks}</span>
+
+                    <span className="ml-auto">
+                      {repo.updated}
+                    </span>
+                  </div>
+                </article>
+              ))
+            )}
           </div>
         </section>
 
-       
-{/* Language Analytics */}
-<section>
-  <SectionHeading
-    title="Language Analytics"
-    subtitle="Programming languages across your repositories"
-  />
+        {/* Language Analytics */}
 
-  <div className="dashboard-card p-5 sm:p-6">
-    {loading ? (
-      <p className="text-sm text-zinc-400">
-        Loading language statistics...
-      </p>
-    ) : languageStats.length === 0 ? (
-      <p className="text-sm text-zinc-400">
-        No language statistics available yet.
-      </p>
-    ) : (
-      <div className="space-y-5">
-        {languageStats.map((language) => (
-          <div key={language.name}>
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-sm font-medium text-zinc-200">
-                {language.name}
-              </span>
+        <section>
+          <SectionHeading
+            title="Language Analytics"
+            subtitle="Programming languages across your repositories"
+          />
 
-              <span className="text-xs text-zinc-400">
-                {language.count} repos ·{" "}
-                {language.percentage.toFixed(1)}%
-              </span>
-            </div>
+          <div className="dashboard-card p-5 sm:p-6">
+            {loading ? (
+              <LanguageSkeleton />
+            ) : languageStats.length === 0 ? (
+              <p className="text-sm text-zinc-400">
+                No language statistics available yet.
+              </p>
+            ) : (
+              <div className="space-y-5">
+                {languageStats.map((language) => (
+                  <div key={language.name}>
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="text-sm font-medium text-zinc-200">
+                        {language.name}
+                      </span>
 
-            <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
-              <div
-                className="h-full rounded-full bg-blue-500 transition-all duration-500"
-                style={{
-                  width: `${language.percentage}%`,
-                }}
-              />
-            </div>
+                      <span className="text-xs text-zinc-400">
+                        {language.count} repos ·{" "}
+                        {language.percentage.toFixed(1)}%
+                      </span>
+                    </div>
+
+                    <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
+                      <div
+                        className="h-full rounded-full bg-blue-500 transition-all duration-500"
+                        style={{
+                          width: `${language.percentage}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        ))}
-      </div>
-    )}
-  </div>
-</section>
+        </section>
 
+        {/* Recent Activity */}
 
-        {/* Recent activity */}
         <section>
           <SectionHeading
             title="Recent Activity"
@@ -675,9 +851,7 @@ export default function DashboardPage() {
 
           <div className="dashboard-card divide-y divide-zinc-800">
             {activityLoading ? (
-              <div className="p-6 text-sm text-zinc-400">
-                Loading your GitHub activity...
-              </div>
+              <ActivitySkeleton />
             ) : activityError ? (
               <div className="p-6 text-sm text-red-400">
                 {activityError}
@@ -718,7 +892,6 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        
       </div>
     </AppShell>
   );

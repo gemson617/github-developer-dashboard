@@ -6,13 +6,14 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import AppShell from "../../../../components/AppShell";
 import RepositoryDetailsSkeleton from "../../../../components/RepositoryDetailsSkeleton";
+import { GitPullRequest } from "lucide-react";
 
 function StatCard({ label, value, detail, icon }) {
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900/70 p-5 transition hover:border-zinc-700">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-zinc-400">{label}</p>
-        <span className="text-lg text-violet-400">{icon}</span>
+        <span className="text-lg text-blue-400">{icon}</span>
       </div>
 
       <p className="mt-3 text-2xl font-semibold tracking-tight text-white">
@@ -90,16 +91,19 @@ export default function RepositoryDetailsPage() {
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-xl text-red-400">
               !
             </div>
+
             <h2 className="mt-4 text-lg font-semibold text-white">
               Couldn't load repository
             </h2>
+
             <p className="mx-auto mt-2 max-w-md text-sm text-zinc-400">
               {error}
             </p>
+
             <button
               type="button"
               onClick={fetchRepository}
-              className="mt-5 rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-violet-500"
+              className="mt-5 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-500"
             >
               Try again
             </button>
@@ -119,7 +123,7 @@ export default function RepositoryDetailsPage() {
             <section className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-violet-500/20 bg-violet-500/10 text-xl text-violet-300">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 text-xl text-blue-300">
                     ◈
                   </div>
 
@@ -127,6 +131,7 @@ export default function RepositoryDetailsPage() {
                     <p className="text-sm text-zinc-500">
                       {repository.owner?.login || owner}
                     </p>
+
                     <h1 className="break-words text-2xl font-semibold tracking-tight text-white sm:text-3xl">
                       {repository.name}
                     </h1>
@@ -143,7 +148,7 @@ export default function RepositoryDetailsPage() {
                   </span>
 
                   {repository.language && (
-                    <span className="rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-xs text-violet-300">
+                    <span className="rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs text-blue-300">
                       {repository.language}
                     </span>
                   )}
@@ -160,7 +165,7 @@ export default function RepositoryDetailsPage() {
                 href={repository.html_url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-zinc-200 transition hover:border-violet-500/50 hover:bg-zinc-800"
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-zinc-200 transition hover:border-blue-500/50 hover:bg-zinc-800"
               >
                 Open on GitHub <span aria-hidden="true">↗</span>
               </a>
@@ -174,18 +179,21 @@ export default function RepositoryDetailsPage() {
                 detail="People who starred this repo"
                 icon="☆"
               />
+
               <StatCard
                 label="Forks"
                 value={number(repository.forks_count)}
                 detail="Repository copies"
-                icon="⑂"
+                icon={<GitPullRequest size={18} />}
               />
+
               <StatCard
                 label="Open issues"
                 value={number(repository.open_issues_count)}
                 detail="Reported issues and PRs"
                 icon="◎"
               />
+
               <StatCard
                 label="Watchers"
                 value={number(repository.subscribers_count)}
@@ -202,10 +210,12 @@ export default function RepositoryDetailsPage() {
                     <h2 className="font-semibold text-white">
                       Repository overview
                     </h2>
+
                     <p className="mt-1 text-sm text-zinc-500">
                       Project information and links
                     </p>
                   </div>
+
                   <span className="text-xl text-zinc-500">▤</span>
                 </div>
 
@@ -213,12 +223,15 @@ export default function RepositoryDetailsPage() {
                   <InfoRow label="Full name">
                     {repository.full_name}
                   </InfoRow>
+
                   <InfoRow label="Default branch">
                     {repository.default_branch || "Not available"}
                   </InfoRow>
+
                   <InfoRow label="License">
                     {repository.license?.spdx_id || "Not specified"}
                   </InfoRow>
+
                   <InfoRow label="Topics">
                     {repository.topics?.length
                       ? repository.topics.join(", ")
@@ -232,7 +245,7 @@ export default function RepositoryDetailsPage() {
                       href={repository.homepage}
                       target="_blank"
                       rel="noreferrer"
-                      className="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition hover:bg-zinc-800"
+                      className="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition hover:border-blue-500/50 hover:bg-zinc-800"
                     >
                       Project website ↗
                     </a>
@@ -242,7 +255,7 @@ export default function RepositoryDetailsPage() {
                     href={`${repository.html_url}/issues`}
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition hover:bg-zinc-800"
+                    className="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition hover:border-blue-500/50 hover:bg-zinc-800"
                   >
                     View issues ↗
                   </a>
@@ -251,7 +264,7 @@ export default function RepositoryDetailsPage() {
                     href={`${repository.html_url}/commits/${encodeURIComponent(repository.default_branch || "main")}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition hover:bg-zinc-800"
+                    className="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 transition hover:border-blue-500/50 hover:bg-zinc-800"
                   >
                     View commits ↗
                   </a>
@@ -262,6 +275,7 @@ export default function RepositoryDetailsPage() {
                 <h2 className="font-semibold text-white">
                   Repository details
                 </h2>
+
                 <p className="mt-1 text-sm text-zinc-500">
                   Visibility and timestamps
                 </p>
@@ -270,17 +284,21 @@ export default function RepositoryDetailsPage() {
                   <InfoRow label="Visibility">
                     {repository.private ? "Private" : "Public"}
                   </InfoRow>
+
                   <InfoRow label="Created">
                     {new Date(repository.created_at).toLocaleDateString()}
                   </InfoRow>
+
                   <InfoRow label="Last updated">
                     {new Date(repository.updated_at).toLocaleDateString()}
                   </InfoRow>
+
                   <InfoRow label="Last pushed">
                     {repository.pushed_at
                       ? new Date(repository.pushed_at).toLocaleDateString()
                       : "Not available"}
                   </InfoRow>
+
                   <InfoRow label="Size">
                     {number(repository.size)} KB
                   </InfoRow>

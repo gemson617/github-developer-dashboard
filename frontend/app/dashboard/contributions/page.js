@@ -41,6 +41,86 @@ function formatDate(dateString) {
   );
 }
 
+// Skeleton Components
+
+function Skeleton({ className = "" }) {
+  return (
+    <div
+      className={`animate-pulse rounded-md bg-zinc-800 ${className}`}
+    />
+  );
+}
+
+function StatSkeleton() {
+  return (
+    <div className="dashboard-card p-5">
+      <div className="mb-4 flex items-center justify-between">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-6 w-6 rounded-full" />
+      </div>
+
+      <Skeleton className="h-8 w-24" />
+      <Skeleton className="mt-3 h-3 w-36" />
+    </div>
+  );
+}
+
+function MonthlySkeleton() {
+  return (
+    <div className="space-y-6">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div key={index}>
+          <div className="mb-3 flex justify-between">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-10" />
+          </div>
+
+          <Skeleton className="h-2 w-full rounded-full" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RepositorySkeleton() {
+  return (
+    <div className="space-y-4">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div
+          key={index}
+          className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-48 max-w-full" />
+              <Skeleton className="h-3 w-28" />
+            </div>
+
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-10" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, itemIndex) => (
+              <div
+                key={itemIndex}
+                className="rounded-lg bg-zinc-800/70 p-3"
+              >
+                <Skeleton className="h-6 w-10" />
+                <Skeleton className="mt-2 h-3 w-20 max-w-full" />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Contribution Helpers
+
 function calculateStreaks(days) {
   let longestStreak = 0;
   let currentStreak = 0;
@@ -56,6 +136,7 @@ function calculateStreaks(days) {
   }
 
   const today = new Date();
+
   const todayKey = [
     today.getFullYear(),
     String(today.getMonth() + 1).padStart(2, "0"),
@@ -99,10 +180,6 @@ function calculateStreaks(days) {
   return { currentStreak, longestStreak };
 }
 
-function getMonthKey(dateString) {
-  return dateString.slice(0, 7);
-}
-
 function getMonthLabels(weeks) {
   let previousMonth = "";
 
@@ -129,6 +206,12 @@ function getMonthLabels(weeks) {
     };
   });
 }
+
+function getMonthKey(dateString) {
+  return dateString.slice(0, 7);
+}
+
+
 
 export default function ContributionsPage() {
   const [period, setPeriod] = useState("12 months");
@@ -298,11 +381,14 @@ export default function ContributionsPage() {
 
   const monthLabels = getMonthLabels(weeks);
 
-  const repositoryActivity = contributionData?.repositoryActivity ?? [];
+  const repositoryActivity =
+    contributionData?.repositoryActivity ?? [];
 
   return (
     <AppShell>
       <div className="mx-auto max-w-7xl space-y-8">
+
+        {/* Page Header */}
         <section className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="mb-2 text-sm text-blue-400">
@@ -329,9 +415,11 @@ export default function ContributionsPage() {
           </select>
         </section>
 
+        {/* Error Message */}
         {error && (
           <section className="dashboard-card p-5">
             <p className="text-sm text-red-400">{error}</p>
+
             <button
               type="button"
               onClick={() => setPeriod((value) => value)}
@@ -342,76 +430,85 @@ export default function ContributionsPage() {
           </section>
         )}
 
+        {/* Statistics */}
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[
-            {
-              label: "Total Contributions",
-              value: stats.total.toLocaleString(),
-              note: "Selected period",
-              icon: "▦",
-            },
-            {
-              label: "Current Streak",
-              value: `${stats.currentStreak} days`,
-              note: "Consecutive active days",
-              icon: "⚡",
-            },
-            {
-              label: "Longest Streak",
-              value: `${stats.longestStreak} days`,
-              note: "Within selected period",
-              icon: "🏆",
-            },
-            {
-              label: "Active Days",
-              value: stats.activeDays.toLocaleString(),
-              note: "Days with contributions",
-              icon: "✓",
-            },
-            {
-              label: "Most Productive Day",
-              value: additionalStats.mostProductiveDay,
-              note: "Highest contribution weekday",
-              icon: "📅",
-            },
-            {
-              label: "Daily Average",
-              value: additionalStats.dailyAverage,
-              note: "Contributions per active day",
-              icon: "📊",
-            },
-            {
-              label: "Best Month",
-              value: additionalStats.bestMonth,
-              note: "Highest contributions",
-              icon: "🏅",
-            },
-          ].map((stat) => (
-            <div key={stat.label} className="dashboard-card p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <p className="text-sm text-zinc-400">{stat.label}</p>
-                <span className="text-xl text-emerald-400">
-                  {stat.icon}
-                </span>
+          {loading ? (
+            Array.from({ length: 7 }).map((_, index) => (
+              <StatSkeleton key={index} />
+            ))
+          ) : (
+            [
+              {
+                label: "Total Contributions",
+                value: stats.total.toLocaleString(),
+                note: "Selected period",
+                icon: "▦",
+              },
+              {
+                label: "Current Streak",
+                value: `${stats.currentStreak} days`,
+                note: "Consecutive active days",
+                icon: "⚡",
+              },
+              {
+                label: "Longest Streak",
+                value: `${stats.longestStreak} days`,
+                note: "Within selected period",
+                icon: "🏆",
+              },
+              {
+                label: "Active Days",
+                value: stats.activeDays.toLocaleString(),
+                note: "Days with contributions",
+                icon: "✓",
+              },
+              {
+                label: "Most Productive Day",
+                value: additionalStats.mostProductiveDay,
+                note: "Highest contribution weekday",
+                icon: "📅",
+              },
+              {
+                label: "Daily Average",
+                value: additionalStats.dailyAverage,
+                note: "Contributions per active day",
+                icon: "📊",
+              },
+              {
+                label: "Best Month",
+                value: additionalStats.bestMonth,
+                note: "Highest contributions",
+                icon: "🏅",
+              },
+            ].map((stat) => (
+              <div key={stat.label} className="dashboard-card p-5">
+                <div className="mb-4 flex items-center justify-between">
+                  <p className="text-sm text-zinc-400">{stat.label}</p>
+                  <span className="text-xl text-emerald-400">
+                    {stat.icon}
+                  </span>
+                </div>
+
+                <p className="text-2xl font-bold text-white">
+                  {stat.value}
+                </p>
+
+                <p className="mt-2 text-xs text-zinc-500">
+                  {stat.note}
+                </p>
               </div>
-
-              <p className="text-2xl font-bold text-white">
-                {loading ? "—" : stat.value}
-              </p>
-
-              <p className="mt-2 text-xs text-zinc-500">
-                {stat.note}
-              </p>
-            </div>
-          ))}
+            ))
+          )}
         </section>
 
+        {/* Contribution Calendar - Existing Loading UI Preserved */}
         <section className="dashboard-card w-fit max-w-full p-5 sm:p-6">
           <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-base font-semibold text-white">
                 Contribution Activity
               </h2>
+
               <p className="mt-1 text-sm text-zinc-500">
                 Each square represents one day.
               </p>
@@ -433,77 +530,78 @@ export default function ContributionsPage() {
               No contribution data available.
             </p>
           ) : !error ? (
-            
-              <div className="custom-scrollbar overflow-x-auto pb-3">
-                <div className="w-fit">
-                  {/* Month labels */}
-                  <div className="mb-3 grid grid-cols-[32px_auto] gap-2">
-                    <div />
+            <div className="custom-scrollbar overflow-x-auto pb-3">
+              <div className="w-fit">
 
-                    <div className="flex gap-1">
-                      {monthLabels.map((month) => (
-                        <div
-                          key={month.index}
-                          className="w-3 shrink-0"
-                        >
-                          <span className="block w-max text-[10px] text-zinc-500">
-                            {month.label}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                {/* Month Labels */}
+                <div className="mb-3 grid grid-cols-[32px_auto] gap-2">
+                  <div />
+
+                  <div className="flex gap-1">
+                    {monthLabels.map((month) => (
+                      <div
+                        key={month.index}
+                        className="w-3 shrink-0"
+                      >
+                        <span className="block w-max text-[10px] text-zinc-500">
+                          {month.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Weekday Labels and Contribution Squares */}
+                <div className="flex gap-2">
+                  <div className="flex h-[108px] w-8 shrink-0 flex-col justify-between text-[10px] text-zinc-500">
+                    <span>Sun</span>
+                    <span>Tue</span>
+                    <span>Thu</span>
+                    <span>Sat</span>
                   </div>
 
-                  {/* Weekday labels and contribution squares */}
-                  <div className="flex gap-2">
-                    <div className="flex h-[108px] w-8 shrink-0 flex-col justify-between text-[10px] text-zinc-500">
-                      <span>Sun</span>
-                      <span>Tue</span>
-                      <span>Thu</span>
-                      <span>Sat</span>
-                    </div>
+                  <div className="flex gap-1">
+                    {weeks.map((week, weekIndex) => (
+                      <div
+                        key={weekIndex}
+                        className="flex w-3 shrink-0 flex-col gap-1"
+                      >
+                        {Array.from({ length: 7 }, (_, dayIndex) => {
+                          const day = week[dayIndex];
 
-                    <div className="flex gap-1">
-                      {weeks.map((week, weekIndex) => (
-                        <div
-                          key={weekIndex}
-                          className="flex w-3 shrink-0 flex-col gap-1"
-                        >
-                          {Array.from({ length: 7 }, (_, dayIndex) => {
-                            const day = week[dayIndex];
-
-                            if (!day || day.empty) {
-                              return (
-                                <div
-                                  key={`empty-${weekIndex}-${dayIndex}`}
-                                  className="h-3 w-3"
-                                />
-                              );
-                            }
-
-                            const level = getContributionLevel(
-                              day.contributionCount,
-                              maxContributionCount
-                            );
-
+                          if (!day || day.empty) {
                             return (
                               <div
-                                key={day.date}
-                                title={`${day.contributionCount} contributions on ${day.date}`}
-                                className={`h-3 w-3 shrink-0 rounded-[3px] ${
-                                  CONTRIBUTION_LEVELS[level]
-                                }`}
+                                key={`empty-${weekIndex}-${dayIndex}`}
+                                className="h-3 w-3"
                               />
                             );
-                          })}
-                        </div>
-                      ))}
-                    </div>
+                          }
+
+                          const level = getContributionLevel(
+                            day.contributionCount,
+                            maxContributionCount
+                          );
+
+                          return (
+                            <div
+                              key={day.date}
+                              title={`${day.contributionCount} contributions on ${day.date}`}
+                              className={`h-3 w-3 shrink-0 rounded-[3px] ${
+                                CONTRIBUTION_LEVELS[level]
+                              }`}
+                            />
+                          );
+                        })}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
+            </div>
           ) : null}
 
+          {/* Calendar Footer */}
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs text-zinc-500">
               {contributionData?.username
@@ -513,17 +611,20 @@ export default function ContributionsPage() {
 
             <div className="flex items-center gap-2 text-xs text-zinc-500">
               <span>Less</span>
+
               {CONTRIBUTION_LEVELS.map((level) => (
                 <span
                   key={level}
                   className={`h-3 w-3 rounded-[3px] ${level}`}
                 />
               ))}
+
               <span>More</span>
             </div>
           </div>
         </section>
 
+        {/* Monthly Contributions */}
         <section className="dashboard-card p-5 sm:p-6">
           <h2 className="text-base font-semibold text-white">
             Monthly Contributions
@@ -533,43 +634,46 @@ export default function ContributionsPage() {
             Your contribution trend over recent months
           </p>
 
-          <div className="mt-6 space-y-5">
+          <div className="mt-6">
             {loading ? (
-              <p className="text-sm text-zinc-400">
-                Loading monthly activity...
-              </p>
+              <MonthlySkeleton />
             ) : (
-              monthlyData.map((item) => (
-                <div key={item.key}>
-                  <div className="mb-2 flex justify-between text-sm">
-                    <span className="text-zinc-300">
-                      {item.month}
-                    </span>
-                    <span className="text-zinc-400">
-                      {item.count.toLocaleString()}
-                    </span>
-                  </div>
+              <div className="space-y-5">
+                {monthlyData.map((item) => (
+                  <div key={item.key}>
+                    <div className="mb-2 flex justify-between text-sm">
+                      <span className="text-zinc-300">
+                        {item.month}
+                      </span>
 
-                  <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
-                    <div
-                      className="h-full rounded-full bg-emerald-500"
-                      style={{
-                        width: `${(item.count / monthMaximum) * 100}%`,
-                      }}
-                    />
+                      <span className="text-zinc-400">
+                        {item.count.toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className="h-2 overflow-hidden rounded-full bg-zinc-800">
+                      <div
+                        className="h-full rounded-full bg-emerald-500"
+                        style={{
+                          width: `${(item.count / monthMaximum) * 100}%`,
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </div>
         </section>
 
+        {/* Repository Activity */}
         <section className="dashboard-card p-5 sm:p-6">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-semibold text-white">
                 Repository Activity
               </h2>
+
               <p className="mt-1 text-sm text-zinc-500">
                 Your contributions grouped by GitHub repository
               </p>
@@ -583,9 +687,7 @@ export default function ContributionsPage() {
           </div>
 
           {loading ? (
-            <p className="py-8 text-center text-sm text-zinc-400">
-              Loading repository activity...
-            </p>
+            <RepositorySkeleton />
           ) : error ? (
             <p className="py-8 text-center text-sm text-zinc-400">
               Unable to load repository activity.
@@ -613,7 +715,9 @@ export default function ContributionsPage() {
                       </a>
 
                       <p className="mt-1 text-xs text-zinc-500">
-                        {repo.isPrivate ? "Private repository" : "Public repository"}
+                        {repo.isPrivate
+                          ? "Private repository"
+                          : "Public repository"}
                       </p>
                     </div>
 
@@ -621,11 +725,13 @@ export default function ContributionsPage() {
                       <p className="text-lg font-bold text-white">
                         {repo.totalContributions.toLocaleString()}
                       </p>
+
                       <p className="text-xs text-zinc-500">
                         Contributions
                       </p>
                     </div>
                   </div>
+
                   <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {[
                       { label: "Commits", value: repo.commits },
@@ -640,6 +746,7 @@ export default function ContributionsPage() {
                         <p className="text-lg font-semibold text-white">
                           {item.value.toLocaleString()}
                         </p>
+
                         <p className="mt-1 text-xs text-zinc-500">
                           {item.label}
                         </p>

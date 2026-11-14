@@ -1,5 +1,6 @@
 
 "use client";
+import { UserRound } from "lucide-react";
 
 import { useState } from "react";
 import { signOut, useSession } from "next-auth/react";
@@ -29,26 +30,6 @@ export default function Header() {
           <ConnectGitHub />
         )}
 
-        <label className="flex w-full max-w-64 items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 sm:w-64">
-          <span className="text-zinc-500">⌕</span>
-          <input
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search dashboard..."
-            className="w-full bg-transparent text-sm text-white outline-none placeholder:text-zinc-600"
-          />
-        </label>
-
-        <button
-          type="button"
-          aria-label="Notifications"
-          className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-800 text-lg text-zinc-300 hover:bg-zinc-800"
-        >
-          ♧
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-blue-500" />
-        </button>
-
         <div className="relative">
           <button
             type="button"
@@ -64,7 +45,7 @@ export default function Header() {
                 className="h-full w-full object-cover"
               />
             ) : (
-              user?.name?.charAt(0)?.toUpperCase() || "G"
+              user?.name?.charAt(0)?.toUpperCase() || <UserRound className="h-5 w-5 text-zinc-400" />
             )}
           </button>
 

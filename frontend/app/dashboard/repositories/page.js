@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -16,6 +15,11 @@ function LazyRepositoryCard({ repo }) {
     const element = cardRef.current;
     if (!element) return;
 
+    if (typeof IntersectionObserver === "undefined") {
+      setIsVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -31,8 +35,7 @@ function LazyRepositoryCard({ repo }) {
     return () => observer.disconnect();
   }, []);
 
-  
-
+  const ownerLogin = repo.owner?.login || repo.owner || "";
 
   return (
     <div ref={cardRef} className="min-h-[130px]">
@@ -40,15 +43,12 @@ function LazyRepositoryCard({ repo }) {
         <article className="dashboard-card p-4 sm:p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-
               <Link
-                href={`/dashboard/repositories/${repo.owner.login}/${repo.name}`}
-                className="font-medium text-white transition hover:text-violet-400"
+                href={`/dashboard/repositories/${ownerLogin}/${repo.name}`}
+                className="font-medium text-white transition hover:text-blue-400"
               >
                 {repo.name}
               </Link>
-
-
 
               <p className="mt-2 text-sm text-zinc-400">
                 {repo.description || "No description provided"}
@@ -62,11 +62,13 @@ function LazyRepositoryCard({ repo }) {
 
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-zinc-500">
             <span>{repo.language || "Not specified"}</span>
-            <span>⭐ {repo.stargazers_count}</span>
-            <span>Forks: {repo.forks_count}</span>
+            <span>⭐ {repo.stargazers_count ?? 0}</span>
+            <span>Forks: {repo.forks_count ?? 0}</span>
             <span>
               Updated{" "}
-              {new Date(repo.updated_at).toLocaleDateString()}
+              {repo.updated_at
+                ? new Date(repo.updated_at).toLocaleDateString()
+                : "Recently"}
             </span>
           </div>
         </article>
@@ -92,47 +94,44 @@ export default function RepositoriesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  
-  
-const fetchRepositories = async () => {
-  try {
-    setLoading(true);
-    setError("");
+  const fetchRepositories = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-    const response = await fetch("/api/github/repos", {
-      cache: "no-store",
-    });
-    if (!response.ok) {
-      if (response.status === 401) {
+      const response = await fetch("/api/github/repos", {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error(
+            "Please connect your GitHub account to view repositories."
+          );
+        }
+
         throw new Error(
-          "Please connect your GitHub account to view repositories."
+          "Failed to fetch GitHub repositories. Please try again."
         );
       }
 
-      throw new Error(
-        "Failed to fetch GitHub repositories. Please try again."
-      );
+      const data = await response.json();
+
+      if (!Array.isArray(data)) {
+        throw new Error("Unexpected repository data received.");
+      }
+
+      setRepositories(data);
+    } catch (err) {
+      setError(err.message || "Something went wrong.");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const data = await response.json();
-
-    if (!Array.isArray(data)) {
-      throw new Error("Unexpected repository data received.");
-    }
-
-    setRepositories(data);
-  } catch (err) {
-    setError(err.message || "Something went wrong.");
-  } finally {
-    setLoading(false);
-  }
-};
-
-useEffect(() => {
-  fetchRepositories();
-}, []);
-
-
+  useEffect(() => {
+    fetchRepositories();
+  }, []);
 
   const languages = useMemo(() => {
     const uniqueLanguages = [
@@ -173,7 +172,7 @@ useEffect(() => {
       })
       .sort((a, b) => {
         if (sort === "stars") {
-          return b.stargazers_count - a.stargazers_count;
+          return (b.stargazers_count || 0) - (a.stargazers_count || 0);
         }
 
         if (sort === "name") {
@@ -229,6 +228,7 @@ useEffect(() => {
   const privateCount = repositories.filter(
     (repo) => repo.private
   ).length;
+
   return (
     <AppShell>
       <div className="mx-auto max-w-7xl space-y-7">
@@ -246,7 +246,7 @@ useEffect(() => {
                 Explore and manage your GitHub projects in one place.
               </p>
             </div>
- 
+
             <div className="flex items-center gap-3">
               <span className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-300">
                 {loading
@@ -264,11 +264,9 @@ useEffect(() => {
                 {loading ? "Refreshing..." : "Refresh"}
               </button>
             </div>
-
           </div>
         </section>
 
-          
         <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
           {[
             {
@@ -307,7 +305,6 @@ useEffect(() => {
             </div>
           ))}
         </section>
-
 
         <section className="dashboard-card space-y-4 p-4 sm:p-5">
           <input
@@ -362,7 +359,6 @@ useEffect(() => {
           </div>
         </section>
 
-        
         {loading && (
           <section
             className="space-y-3"
@@ -375,20 +371,20 @@ useEffect(() => {
           </section>
         )}
 
-      {error && (
-        <div className="dashboard-card flex flex-wrap items-center justify-between gap-4 p-5">
-          <p className="text-sm text-red-400">{error}</p>
+        {error && (
+          <div className="dashboard-card flex flex-wrap items-center justify-between gap-4 p-5">
+            <p className="text-sm text-red-400">{error}</p>
 
-          <button
-            type="button"
-            onClick={fetchRepositories}
-            disabled={loading}
-            className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-white transition hover:bg-zinc-800 disabled:opacity-50"
-          >
-            {loading ? "Retrying..." : "Try again"}
-          </button>
-        </div>
-      )}
+            <button
+              type="button"
+              onClick={fetchRepositories}
+              disabled={loading}
+              className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-white transition hover:bg-zinc-800 disabled:opacity-50"
+            >
+              {loading ? "Retrying..." : "Try again"}
+            </button>
+          </div>
+        )}
 
         {!loading && !error && (
           <>
