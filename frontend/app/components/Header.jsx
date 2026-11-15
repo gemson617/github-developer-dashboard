@@ -1,13 +1,12 @@
 
 "use client";
-import { UserRound } from "lucide-react";
 
 import { useState } from "react";
+import { Menu, UserRound } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import ConnectGitHub from "./ConnectGitHub";
 
-export default function Header() {
-  const [search, setSearch] = useState("");
+export default function Header({ onMenuClick }) {
   const [profileOpen, setProfileOpen] = useState(false);
 
   const { data: session, status } = useSession();
@@ -15,14 +14,27 @@ export default function Header() {
   const isLoggedIn = status === "authenticated";
 
   return (
-    <header className="flex min-h-[76px] flex-wrap items-center justify-between gap-4 border-b border-zinc-800 bg-[#0c0c0e] px-5 py-4 sm:px-8">
-      <div>
-        <h2 className="text-lg font-semibold text-white">
-          Developer Dashboard
-        </h2>
-        <p className="mt-1 text-xs text-zinc-500">
-          Your GitHub activity at a glance
-        </p>
+    <header className="flex min-h-[76px] items-center justify-between gap-2 border-b border-zinc-800 bg-[#0c0c0e] px-3 py-4 sm:px-8">
+      <div className="flex min-w-0 items-center gap-3">
+
+        {/* Mobile sidebar toggle */}
+        <button
+          type="button"
+          onClick={onMenuClick}
+          aria-label="Open navigation menu"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-zinc-300 transition hover:bg-zinc-800 hover:text-white md:hidden"
+        >
+          <Menu className="h-6 w-6" />
+        </button>
+
+        <div className="min-w-0">
+          <h2 className="truncate text-base font-semibold text-white sm:text-lg">
+            Developer Dashboard
+          </h2>
+          <p className="mt-1 truncate text-xs text-zinc-500">
+            Your GitHub activity at a glance
+          </p>
+        </div>
       </div>
 
       <div className="flex items-center gap-3">
@@ -45,7 +57,8 @@ export default function Header() {
                 className="h-full w-full object-cover"
               />
             ) : (
-              user?.name?.charAt(0)?.toUpperCase() || <UserRound className="h-5 w-5 text-zinc-400" />
+              user?.name?.charAt(0)?.toUpperCase() ||
+              <UserRound className="h-5 w-5 text-zinc-400" />
             )}
           </button>
 
@@ -57,9 +70,11 @@ export default function Header() {
                     <p className="truncate text-sm font-semibold text-white">
                       {user?.username || user?.name || "GitHub user"}
                     </p>
+
                     <p className="mt-1 break-words text-xs text-zinc-400">
                       {user?.email || "No public email available"}
                     </p>
+
                     {user?.name && user?.username && (
                       <p className="mt-1 truncate text-xs text-zinc-500">
                         {user.name}
